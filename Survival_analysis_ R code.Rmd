@@ -1,0 +1,82 @@
+---
+title: "Survival Analysis of Cancer Patients"
+author: "Akshay"
+date: "2026-03-26"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+## Introduction
+
+This project analyzes survival patterns of cancer patients using Kaplan-Meier estimation and Cox proportional hazards regression. The objective is to estimate survival probabilities and identify factors affecting patient survival.
+
+## Load Required Libraries
+
+```{r}
+library(survival)
+library(survminer)
+
+```
+
+## Load Dataset
+
+```{r}
+data <- read.csv(file.choose())
+head(data)
+names(data)
+nrow(data)
+```
+
+## Data Overview
+
+```{r}
+summary(data)
+table(data$Status)
+
+```
+
+## Kaplan-Meier Survival Analysis (Overall)
+
+```{r}
+fit <- survfit(Surv(Survival_Time_Days, Status) ~ 1, data = data)
+summary(fit)
+
+```
+
+## Plot Kaplan-Meier Survival Curve
+
+```{r}
+ggsurvplot(fit, data = data, xlab = "Time (Days)", ylab = "Survival Probability",title = "Kaplan-Meier Survival Curve",conf.int = TRUE)
+
+```
+
+## Kaplan-Meier Survival by Cancer Stage
+
+```{r}
+fit_stage <- survfit(Surv(Survival_Time_Days, Status) ~ Cancer_Stage, data = data)
+
+ggsurvplot(fit_stage, data = data, pval = TRUE, legend.title = "Cancer Stage", xlab = "Time (Days)", ylab = "Survival Probability")
+
+
+```
+
+## Cox Proportional Hazards Model
+
+```{r}
+cox_model <- coxph(Surv(Survival_Time_Days, Status) ~ Cancer_Stage + Age + Gender, data = data)
+summary(cox_model)
+
+```
+
+## Life Table (Interval Survival Estimates)
+
+```{r}
+summary(fit, times = seq(0, max(data$Survival_Time_Days), by = 100))
+
+```
+
+## Conclusion
+
+The Kaplan-Meier analysis shows a steady decline in survival probability over time. The median survival is approximately 1330 days. Cox regression indicates that cancer stage is a significant predictor of survival, highlighting the importance of early diagnosis.
